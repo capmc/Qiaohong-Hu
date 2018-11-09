@@ -1,6 +1,6 @@
-%LET path=C:\Users\Qiaohong Hu\OneDrive - University of Southern California\AoU\removing duplicates\;
-%LET i2b2=All_Of_Us Appts_11-02-2018.csv;
-%LET redcap=KeckAllOfUsResearchP_DATA_2018-11-06_1245.csv;
+%LET path=;   /*Location of files*/
+%LET i2b2=All_Of_Us Appts.csv;
+%LET redcap=KeckAllOfUsResearch.csv;
 
 PROC IMPORT OUT= WORK.remove
             DATAFILE= "&path&redcap"
