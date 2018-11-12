@@ -1,6 +1,6 @@
-%LET path=;   /*Location of files*/
-%LET i2b2=All_Of_Us Appts.csv;
-%LET redcap=KeckAllOfUsResearch.csv;
+%LET path=/schhome/users/QiaohongHu/AoU/i2b2 Update/;
+%LET i2b2=All_Of_Us Appts_11-09-2018.csv;
+%LET redcap=KeckAllOfUsResearchP_DATA_2018-11-12_0911.csv;
 
 PROC IMPORT OUT= WORK.remove
             DATAFILE= "&path&redcap"
@@ -231,17 +231,17 @@ PROC SORT DATA=outnot1 OUT=odob;
 RUN;
 PROC SORT DATA=redcap2 OUT=rdob;
         BY dob;
-RUN;         
+RUN;
 data rdob;
-set rdob; 
-if dob  ne .; 
+set rdob;
+if dob  ne .;
 run;
 
 DATA dob1;
         MERGE  odob(in=a) rdob(RENAME=(first_name=firstname last_name=lastname email_address=email));
         BY dob;
-        IF a;  
-		IF study_id ne .;
+        IF a;
+                IF study_id ne .;
 RUN;
 /*Same dob and names*/
 DATA dobnm;
@@ -263,7 +263,7 @@ RUN;
 /*Same dob and phone numbers but different names*/
 DATA check3;
         SET dobph;
-        IF upcase(firstname)=upcase(first_name)and upcase(lastname)=upcase(last_name) THEN DELETE;
+        IF upcase(firstname)=upcase(first_name)and upcase(lastname)=upcase(last_name) THEN DELETE;   if study_id = 51864 then delete;
 RUN;
 PROC SORT DATA=phnm;
         BY study_id;
@@ -280,20 +280,29 @@ DATA one;
         BY study_id;
 RUN;
 
+PROC SORT DATA=one;
+BY MRN;
+RUN;
+
+PROC SORT DATA=removed_i2b2_2;
+BY mrn;
+RUN;
+
 DATA outexist1;
-	MERGE one(keep=study_id) outexist;
-	BY study_id;
-	format appointment_time time5.;
-	keep study_id mrn cdm_id appointment_clinic appointment_date appointment_time preferred_language appointment_md database;
+MERGE removed_i2b2_2 one(KEEP=mrn study_id);
+BY mrn;
+IF STUDY_ID NE .;
+FORMAT appointment_time time5.;
+KEEP study_id mrn cdm_id appointment_clinic appointment_date appointment_time preferred_language appointment_md database;RUN;
 RUN;
 
 DATA outnot2;
-	merge outexist1(in=a keep=study_id) removed_i2b2_2;
-	format appointment_time time5.;
-	by study_id;
-	if a then delete;
-	keep study_id mrn cdm_id appointment_clinic appointment_date appointment_time preferred_language appointment_md database;
-run;
+MERGE removed_i2b2_2 one(KEEP=mrn study_id);
+BY mrn;
+IF STUDY_ID = .;
+FORMAT appointment_time time5.;
+DROP phone_number2 email_address2;
+RUN;
 
 PROC EXPORT DATA= WORK.outexist1
             OUTFILE= "&path.exist.csv"
