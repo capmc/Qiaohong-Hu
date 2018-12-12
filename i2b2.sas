@@ -23,7 +23,7 @@ run;
 proc freq data=i2b2; tables appointment_date;
 run;*/
 /*Rename variables to match REDCap variable names*/
-data i2b4;
+data i2b3;
 set i2b2 (rename=(provider_name=appointment_md));
 if mrn=. then delete;
 if email_address=. and phone_number=. then delete;
@@ -33,11 +33,11 @@ if appointment_date <= '19SEP2018'd then delete; /*delete appointments within ne
 where preferred_language="English" or preferred_language="Spanish" ;
 run;
 
-/*proc freq data=i2b4;
+/*proc freq data=i2b3;
 tables appointment_md preferred_language appointment_date; run; */
 
-data i2b5;
-set i2b4;
+data i2b4;
+set i2b3;
 where appointment_clinic="Doctors of USC Family Medicine" or
 appointment_clinic="Internal Medicine Cardiology" or
 appointment_clinic="Internal Medicine Pulmonary" or
@@ -75,48 +75,35 @@ appointment_clinic="USC-SL" or
 appointment_clinic="USC-SP" or
 appointment_clinic="USC-VC"; run;
 
-/*proc freq data=i2b5;
+/*proc freq data=i2b4;
 tables appointment_clinic;
 run; */
 
-data i2b3;
-set i2b5;
-if appointment_md="HOCHMAN MD, MICHAEL E" or
-appointment_md="KARP MD, MICHAEL" or
-appointment_md="HONG MD, KURT M" or
-appointment_md="VASQUEZ MD, MABEL" or
-appointment_md="SAPKIN MD, JOSHUA D" or
-appointment_md="BEN-ARI MD, RON" or
-appointment_md="KHAN MD, SHAZIA S" or
-appointment_clinic="Otolaryngology and Head and Neck Surgery" then database="Henne";
-else database="i2b2"; run;
 
-/*proc freq data=i2b3;
-tables database;
-run;*/
+
 
 /*Check what format mrn is in for both
-proc contents data=i2b3;
+proc contents data=i2b4;
 run;
 proc contents data=remove;
 run;
 
-proc freq data=i2b3;
+proc freq data=i2b4;
 tables mrn;
 run; */
 
-data i2b3;
-set i2b3;
+data i2b4;
+set i2b4;
 mrn1=mrn+0;
 drop mrn;
 run;
-proc sort data=i2b3(rename=(mrn1=mrn))
-out=i2b6;
+proc sort data=i2b4(rename=(mrn1=mrn))
+out=i2b5;
 by mrn descending appointment_date descending appointment_time;
 run;
 
-data i2b7;
-set i2b6;
+data i2b6;
+set i2b5;
 by mrn;
 if first.mrn;
 run;
@@ -142,7 +129,7 @@ by mrn; run;
 
 /*Only keep data from i2b2 list*/
 data merged_i2b2_removedecisions;
-merge removed i2b7 (in=a);
+merge removed i2b6 (in=a);
 by mrn;
 if a;
 run;
